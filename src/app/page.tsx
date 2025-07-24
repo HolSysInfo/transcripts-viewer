@@ -1,13 +1,8 @@
 "use client"
 
-import { ChannelHeader } from "@/components/channel-header"
-import { MessageList } from "@/components/message-list"
-import { MessageInput } from "@/components/message-input"
-import { mockChannel, mockMessages, mockUsers } from "@/lib/mock-data"
 import { useState } from "react"
 import { useRouter } from "next/navigation"
 
-const now = new Date();
 export default function Home() {
   const [input, setInput] = useState("")
   const router = useRouter()
