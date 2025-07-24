@@ -34,4 +34,4 @@
   })
 
   export default mongoose.models.Transcript ||
-    mongoose.model("Transcript", TranscriptSchema)
+    mongoose.model("Transcripts", TranscriptSchema)
