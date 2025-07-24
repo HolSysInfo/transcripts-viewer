@@ -8,7 +8,6 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
   const id = segments[segments.length - 1];
   try {
     const transcript = await Transcript.findById(id).lean();
-    console.log("Transcript ID:", transcript);
     if (!transcript) {
       return NextResponse.json({ error: "Transcript not found" }, { status: 404 });
     }
