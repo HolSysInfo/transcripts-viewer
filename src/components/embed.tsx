@@ -1,9 +1,35 @@
 import type { Embed as EmbedType } from "@/types/discord"
-import Image from "next/image"
 import ReactMarkdown from "react-markdown"
+import remarkGfm from "remark-gfm"
+import rehypeRaw from "rehype-raw"
 
 interface EmbedProps {
   embed: EmbedType
+}
+
+// Custom renderer for underline (Discord uses __text__ for underline)
+const markdownComponents = {
+  a: ({ href, children }: any) => (
+    <a
+      href={href}
+      className="text-[#00aff4] hover:underline"
+      target="_blank"
+      rel="noopener noreferrer"
+    >
+      {children}
+    </a>
+  ),
+}
+
+function discordMarkdown(text: string) {
+  // Convert Discord underline to markdown-it underline (which is not standard)
+  // Instead, convert __text__ to <u>text</u> for HTML, but let rehypeRaw handle it
+  // Also handle **__text__** and __**text**__ as <strong><u>text</u></strong>
+  return text
+    .replace(/(\*\*")(.*?)("\*\*)/g, '<strong>"$2"</strong>') // **"text"**
+    .replace(/(\*\*__)(.*?)(__\*\*)/g, '<strong><u>$2</u></strong>') // **__text__**
+    .replace(/(__\*\*)(.*?)(\*\*__)/g, '<strong><u>$2</u></strong>') // __**text**__
+    .replace(/__(.*?)__/g, '<u>$1</u>') // __text__
 }
 
 export function Embed({ embed }: EmbedProps) {
@@ -53,8 +79,13 @@ export function Embed({ embed }: EmbedProps) {
         )}
 
         {embed.description && (
-          <div className="text-[#dcddde] text-sm mb-3 leading-relaxed">
-            <ReactMarkdown>{embed.description}</ReactMarkdown>
+          <div className="text-[#dcddde] text-sm mb-3 leading-relaxed discord-markdown">
+            <ReactMarkdown
+              remarkPlugins={[remarkGfm]}
+              rehypePlugins={[rehypeRaw]}
+              components={markdownComponents}
+              children={discordMarkdown(embed.description)}
+            />
           </div>
         )}
 
@@ -62,11 +93,25 @@ export function Embed({ embed }: EmbedProps) {
           <div className="grid gap-2 mb-3">
             {embed.fields.map((field, index) => (
               <div key={index} className={field.inline ? "inline-block mr-4" : "block"}>
-                <div className="text-white font-semibold text-sm mb-1">
-                  <ReactMarkdown>{field.name}</ReactMarkdown>
+                <div className="text-white font-semibold text-sm mb-1 discord-markdown">
+                  <ReactMarkdown
+                    remarkPlugins={[remarkGfm]}
+                    components={markdownComponents}
+                    children={discordMarkdown(field.name)}
+                    skipHtml={false}
+                    disallowedElements={[]}
+                    
+                  />
                 </div>
-                <div className="text-[#dcddde] text-sm">
-                  <ReactMarkdown>{field.value}</ReactMarkdown>
+                <div className="text-[#dcddde] text-sm discord-markdown">
+                  <ReactMarkdown
+                    remarkPlugins={[remarkGfm]}
+                    components={markdownComponents}
+                    children={discordMarkdown(field.value)}
+                    skipHtml={false}
+                    disallowedElements={[]}
+                    
+                  />
                 </div>
               </div>
             ))}

@@ -71,7 +71,7 @@ export function Message({ message, showAvatar = true, isGrouped = false, message
       {repliedMessage && repliedAuthor && (
         <div className='flex items-center  relative ml-[56px] before:content-[""] before:block before:absolute before:top-2/4 before:right-full before:bottom-[0] before:-left-[36px] before:mr-[4px] before:-mt-px before:-ml-px before:[border-left:2px_solid_#4F545C] before:[border-bottom:0_solid_#4F545C] before:[border-right:0_solid_#4F545C] before:[border-top:2px_solid_#4f545C] before:rounded-tl-[6px]' style={{ minHeight: 32 }}>
           <img
-            src={repliedAuthor.avatar}
+            src={repliedAuthor.avatar || "https://discord.com/assets/18e336a74a159cfd.png"}
             alt={repliedAuthor.username}
             className="w-4 h-4 rounded-full mr-1"
           />
@@ -90,7 +90,7 @@ export function Message({ message, showAvatar = true, isGrouped = false, message
         {showAvatar && !isGrouped ? (
           <div className="flex-shrink-0 mr-4 relative">
             <img
-              src={author?.avatar || "/placeholder.svg"}
+              src={author?.avatar || "https://discord.com/assets/18e336a74a159cfd.png"}
               alt={author?.username || "Unknown"}
               width={40}
               height={40}
@@ -166,6 +166,14 @@ type MentionMarkdownProps = {
    roles?: { id: string; name: string; color?: string }[]
 };
 
+function discordMarkdown(text: string) {
+  return text
+    .replace(/(\*\*")(.*?)("\*\*)/g, '<strong>"$2"</strong>') // **"text"**
+    .replace(/(\*\*__)(.*?)(__\*\*)/g, '<strong><u>$2</u></strong>') // **__text__**
+    .replace(/(__\*\*)(.*?)(\*\*__)/g, '<strong><u>$2</u></strong>') // __**text**__
+    .replace(/__(.*?)__/g, '<u>$1</u>'); // __text__
+}
+
 export default function MentionMarkdown({ content, users, roles = [] }: MentionMarkdownProps) {
   const replaced = mentionsToHtml(escapeMentions(content), users, roles);
 
@@ -185,7 +193,7 @@ export default function MentionMarkdown({ content, users, roles = [] }: MentionM
         }
       }}
     >
-      {replaced}
+      {discordMarkdown(replaced)}
     </Markdown>
   );
 }
