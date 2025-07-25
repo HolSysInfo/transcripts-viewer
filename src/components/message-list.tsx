@@ -4,10 +4,11 @@ import { Message } from "./message"
 interface MessageListProps {
   messages: MessageType[]
   users: User[],
-  now: Date // Optional prop to pass current time for grouping logic
+  now: Date
+  channels: any[] // Add channels prop
 }
 
-export function MessageList({ messages, users, now }: MessageListProps) {
+export function MessageList({ messages, users, now, channels }: MessageListProps) {
   const shouldGroupMessage = (current: MessageType, previous?: MessageType) => {
     if (!previous) return false
 
@@ -33,6 +34,7 @@ export function MessageList({ messages, users, now }: MessageListProps) {
               now={now}
               isGrouped={isGrouped}
               showAvatar={!isGrouped}
+              channels={channels} // Pass channels to Message
             />
           )
         })}

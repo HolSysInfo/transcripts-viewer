@@ -21,11 +21,11 @@ interface MessageProps {
   users: User[];
   showAvatar?: boolean;
   isGrouped?: boolean;
-  now: Date; // Optional prop to pass current time for grouping logic
+  now: Date;
+  channels: any[]; // Add channels prop
 }
 
-
-export function Message({ message, showAvatar = true, isGrouped = false, messages, users = [], now }: MessageProps) {
+export function Message({ message, showAvatar = true, isGrouped = false, messages, users = [], now, channels }: MessageProps) {
   const formatTimestamp = (date: Date) => {
     const diff = now.getTime() - date.getTime();
     const days = Math.floor(diff / (1000 * 60 * 60 * 24));
@@ -123,7 +123,7 @@ export function Message({ message, showAvatar = true, isGrouped = false, message
             </div>
           )}
 
-          {message.content && <div className="text-[#dcddde] leading-relaxed "><MentionMarkdown content={message.content} users={users} /></div>}
+          {message.content && <div className="text-[#dcddde] leading-relaxed "><MentionMarkdown content={message.content} users={users} channels={channels} /></div>}
 
           {message.embeds && message.embeds.map((embed) => {
             return <Embed key={embed._id} embed={embed} />
@@ -163,7 +163,8 @@ export function Message({ message, showAvatar = true, isGrouped = false, message
 type MentionMarkdownProps = {
   content: string;
   users: User[];
-   roles?: { id: string; name: string; color?: string }[]
+  roles?: { id: string; name: string; color?: string }[];
+  channels?: any[]; // Add channels prop
 };
 
 function discordMarkdown(text: string) {
@@ -174,8 +175,8 @@ function discordMarkdown(text: string) {
     .replace(/__(.*?)__/g, '<u>$1</u>'); // __text__
 }
 
-export default function MentionMarkdown({ content, users, roles = [] }: MentionMarkdownProps) {
-  const replaced = mentionsToHtml(escapeMentions(content), users, roles);
+export default function MentionMarkdown({ content, users, roles = [], channels = [] }: MentionMarkdownProps) {
+  const replaced = mentionsToHtml(escapeMentions(content), users, roles, channels);
 
   return (
     <Markdown
@@ -198,15 +199,24 @@ export default function MentionMarkdown({ content, users, roles = [] }: MentionM
   );
 }
 
-function mentionsToHtml(text: string, users: User[], roles: { id: string; name: string; color?: string }[]) {
+function mentionsToHtml(
+  text: string,
+  users: User[],
+  roles: { id: string; name: string; color?: string }[],
+  channels: any[] = []
+) {
   return text
     .replace(/@@USER_(\d+)@@/g, (_, id) => {
       const user = users.find(u => u._id === id);
-      return `<span class="mention-user" data-id="${id}">@${user?.username || "Unknown"}</span>`;
+      return `<span class="p-[2px] rounded-sm bg-blue-700/30" data-id="${id}">@${user?.username || "Unknown"}</span>`;
     })
     .replace(/@@ROLE_(\d+)@@/g, (_, id) => {
       const role = roles.find(r => r.id === id);
       const color = role?.color ? ` style="color:${role.color}"` : "";
-      return `<span class="mention-role"${color} data-id="${id}">@${role?.name || "Unknown Role"}</span>`;
+      return `<span class="p-[2px] rounded-sm bg-purple-500/30" data-id="${id}">@${role?.name || "Unknown Role"}</span>`;
+    })
+    .replace(/<#(\d+)>/g, (_, id) => {
+      const channel = channels.find(c => c._id === id);
+      return `<span class="p-[2px] rounded-sm bg-blue-700/30" data-id="${id}">#${channel?.name || "unknown-channel"}</span>`;
     });
 }
