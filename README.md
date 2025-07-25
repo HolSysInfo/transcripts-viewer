@@ -16,7 +16,7 @@ Discord tickets transcript inspector in Next.js (App Router) with TypeScript.
 ## Installation
 1. Clone the repository:
    ```bash
-   git clone https://github.com/USERNAME/transcripts-viewer.git
+   git clone https://github.com/rhaym-tech/transcripts-viewer.git
    ```
 2. Install dependencies:
    ```bash
