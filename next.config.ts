@@ -1,9 +1,6 @@
 import type { NextConfig } from "next";
 
-const nextConfig: NextConfig = {
-  env: {
-    MONGODB_URI: process.env.MONGODB_URI,
-  }
-};
+// MongoDB credentials are read only by server code at runtime.
+const nextConfig: NextConfig = {};
 
 export default nextConfig;
